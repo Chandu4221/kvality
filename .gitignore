@@ -1,0 +1,14 @@
+# Generated
+build/
+.gradle/
+
+# IDE
+.idea/
+.kotlin/
+
+# Machine specific
+local.properties
+*.iml
+
+# Mac
+.DS_Store
