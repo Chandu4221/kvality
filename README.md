@@ -33,19 +33,15 @@ implementation("io.github.chandu4221:kvality-core:1.0.0")
 ### Single Field Validation
 
 ```kotlin
-// String
-val result = Kvality.string().min(3).max(255).email().required().validate("test@example.com")
+val nameResult = Kvality.string().min(3).max(255).required().validate("Chandu")
 
-// Number
-val result = Kvality.number().min(18).required().validate(25)
+val ageResult = Kvality.number().min(18).required().validate(25)
 
-// Boolean
-val result = Kvality.boolean().isTrue().validate(true)
+val activeResult = Kvality.boolean().isTrue().validate(true)
 
-// Check result
-when (result) {
+when (nameResult) {
     is ValidationResult.Success -> println("Valid!")
-    is ValidationResult.Failure -> println(result.errors)
+    is ValidationResult.Failure -> println(nameResult.errors)
 }
 ```
 
@@ -65,13 +61,10 @@ val result = userSchema.validate(mapOf(
     "age"       to 15
 ))
 
-// ValidationResult.Failure(
-//   errors = {
-//     "firstname": ["min length is 3 characters"],
-//     "email":     ["must be a valid email address"],
-//     "age":       ["must be at least 18"]
-//   }
-// )
+when (result) {
+    is ValidationResult.Success -> println("Valid!")
+    is ValidationResult.Failure -> println(result.errors)
+}
 ```
 
 ---
