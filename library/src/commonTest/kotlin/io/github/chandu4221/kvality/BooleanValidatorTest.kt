@@ -1,6 +1,7 @@
 package io.github.chandu4221.kvality
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BooleanValidatorTest {
@@ -9,6 +10,7 @@ class BooleanValidatorTest {
     fun `required fails on null`() {
         val result = Kvality.boolean().required().validate(null)
         assertTrue(result is ValidationResult.Failure)
+        assertEquals("boolean.required", (result as ValidationResult.Failure).errors.first().code)
     }
 
     @Test
@@ -21,6 +23,7 @@ class BooleanValidatorTest {
     fun `isTrue fails on false`() {
         val result = Kvality.boolean().isTrue().validate(false)
         assertTrue(result is ValidationResult.Failure)
+        assertEquals("boolean.isTrue", (result as ValidationResult.Failure).errors.first().code)
     }
 
     @Test
@@ -33,6 +36,7 @@ class BooleanValidatorTest {
     fun `isFalse fails on true`() {
         val result = Kvality.boolean().isFalse().validate(true)
         assertTrue(result is ValidationResult.Failure)
+        assertEquals("boolean.isFalse", (result as ValidationResult.Failure).errors.first().code)
     }
 
     @Test
@@ -47,5 +51,6 @@ class BooleanValidatorTest {
             .custom { if (it == null) "must not be null" else null }
             .validate(null)
         assertTrue(result is ValidationResult.Failure)
+        assertEquals("boolean.custom", (result as ValidationResult.Failure).errors.first().code)
     }
 }
