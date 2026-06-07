@@ -36,17 +36,20 @@ class ListValidator<T> internal constructor(
         }
     }
 
-    fun optional(): ListValidator<T> = apply {
-        rules.clear()
-    }
+    private var isNullable = false
+    private var isOptional = false
+
+    fun nullable(): ListValidator<T> = apply { isNullable = true }
+
+    fun optional(): ListValidator<T> = apply { isOptional = true }
 
     override fun validate(value: List<T>?): ValidationResult {
+        if (value == null && (isNullable || isOptional)) return ValidationResult.Success
+
         val errors = mutableListOf<ValidationError>()
 
-        // run list-level rules
         rules.mapNotNull { it(value) }.forEach { errors.add(it) }
 
-        // run item-level validation
         value?.forEachIndexed { index, item ->
             val itemPath = "$path[$index]"
             val result = itemValidator.validate(item)

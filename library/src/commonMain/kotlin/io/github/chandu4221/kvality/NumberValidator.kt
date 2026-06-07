@@ -71,9 +71,12 @@ class NumberValidator internal constructor(
         }
     }
 
-    fun optional(): NumberValidator = apply {
-        rules.clear()
-    }
+    private var isNullable = false
+    private var isOptional = false
+
+    fun nullable(): NumberValidator = apply { isNullable = true }
+
+    fun optional(): NumberValidator = apply { isOptional = true }
 
     fun custom(code: String = "number.custom", fn: (Number?) -> String?): NumberValidator = apply {
         rules += { v ->
@@ -82,10 +85,13 @@ class NumberValidator internal constructor(
     }
 
     override fun validate(value: Number?): ValidationResult {
+        if (value == null && (isNullable || isOptional)) return ValidationResult.Success
+
         val errors = rules.mapNotNull { it(value) }
         return if (errors.isEmpty()) ValidationResult.Success
         else ValidationResult.Failure(errors)
     }
+
 
     internal fun withField(name: String, parentPath: String = ""): NumberValidator {
         val newPath = if (parentPath.isEmpty()) name else "$parentPath.$name"

@@ -28,9 +28,12 @@ class BooleanValidator internal constructor(
         }
     }
 
-    fun optional(): BooleanValidator = apply {
-        rules.clear()
-    }
+    private var isNullable = false
+    private var isOptional = false
+
+    fun nullable(): BooleanValidator = apply { isNullable = true }
+
+    fun optional(): BooleanValidator = apply { isOptional = true }
 
     fun custom(code: String = "boolean.custom", fn: (Boolean?) -> String?): BooleanValidator = apply {
         rules += { v ->
@@ -39,6 +42,8 @@ class BooleanValidator internal constructor(
     }
 
     override fun validate(value: Boolean?): ValidationResult {
+        if (value == null && (isNullable || isOptional)) return ValidationResult.Success
+
         val errors = rules.mapNotNull { it(value) }
         return if (errors.isEmpty()) ValidationResult.Success
         else ValidationResult.Failure(errors)

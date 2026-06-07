@@ -1,7 +1,7 @@
 package io.github.chandu4221.kvality
 
 class Schema internal constructor(
-    private val fields: Map<String, Validator<Any>>,
+    private val fields: Map<String, Validator<*>>,
     private val crossFieldValidators: MutableList<(Map<String, Any?>) -> ValidationError?> = mutableListOf()
 ) {
     fun validate(input: Map<String, Any?>, parentPath: String = ""): ValidationResult {
@@ -11,12 +11,23 @@ class Schema internal constructor(
             val value = input[fieldName]
             val path = if (parentPath.isEmpty()) fieldName else "$parentPath.$fieldName"
 
-            @Suppress("UNCHECKED_CAST")
-            val result = validator.validate(value)
+            val result = when (validator) {
+                is ObjectValidator -> {
+                    @Suppress("UNCHECKED_CAST")
+                    validator.withField(fieldName, parentPath).validate(value as? Map<String, Any?>)
+                }
+
+                else -> @Suppress("UNCHECKED_CAST") (validator as Validator<Any?>).validate(value)
+            }
 
             if (result is ValidationResult.Failure) {
                 result.errors.forEach { error ->
-                    allErrors.add(error.copy(field = fieldName, path = path))
+                    allErrors.add(
+                        error.copy(
+                            field = if (error.field == "value") fieldName else error.field,
+                            path = if (error.path == "value") path else error.path
+                        )
+                    )
                 }
             }
         }
@@ -51,6 +62,16 @@ class Schema internal constructor(
     }
 
     fun partial(): Schema {
-        return Schema(fields.toMutableMap())
+        val partialFields = fields.mapValues { (_, validator) ->
+            when (validator) {
+                is StringValidator -> validator.optional()
+                is NumberValidator -> validator.optional()
+                is BooleanValidator -> validator.optional()
+                is ListValidator<*> -> validator.optional()
+                is ObjectValidator -> validator.optional()
+                else -> validator
+            }
+        }
+        return Schema(partialFields.toMutableMap(), crossFieldValidators.toMutableList())
     }
 }

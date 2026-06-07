@@ -7,4 +7,6 @@ object Kvality {
     fun <T> list(itemValidator: Validator<T>): ListValidator<T> = ListValidator(itemValidator)
     fun <T> oneOf(vararg values: T): EnumValidator<T> = EnumValidator(values.toSet())
     fun <T : Enum<T>> enum(values: Array<T>): EnumValidator<T> = EnumValidator(values.toSet())
+    fun objectSchema(block: SchemaBuilder.() -> Unit): ObjectValidator =
+        ObjectValidator(SchemaBuilder().apply(block).build())
 }

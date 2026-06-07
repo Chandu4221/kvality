@@ -2,12 +2,11 @@ package io.github.chandu4221.kvality
 
 class SchemaBuilder internal constructor() {
 
-    private val fields = mutableMapOf<String, Validator<Any>>()
+    private val fields = mutableMapOf<String, Validator<*>>()
     private val crossFieldValidators = mutableListOf<(Map<String, Any?>) -> ValidationError?>()
 
-    @Suppress("UNCHECKED_CAST")
     fun <T> field(name: String, block: Kvality.() -> Validator<T>) {
-        fields[name] = Kvality.block() as Validator<Any>
+        fields[name] = Kvality.block()
     }
 
     fun validate(message: String = "validation failed", fn: (Map<String, Any?>) -> Boolean): SchemaBuilder = apply {
@@ -17,7 +16,7 @@ class SchemaBuilder internal constructor() {
         }
     }
 
-    internal fun getFields(): Map<String, Validator<Any>> = fields
+    internal fun getFields(): Map<String, Validator<*>> = fields
     internal fun getCrossFieldValidators() = crossFieldValidators
 
     internal fun build(): Schema = Schema(fields, crossFieldValidators)

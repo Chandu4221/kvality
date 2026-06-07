@@ -118,9 +118,12 @@ class StringValidator internal constructor(
         }
     }
 
-    fun optional(): StringValidator = apply {
-        rules.clear()
-    }
+    private var isNullable = false
+    private var isOptional = false
+
+    fun nullable(): StringValidator = apply { isNullable = true }
+
+    fun optional(): StringValidator = apply { isOptional = true }
 
     fun custom(code: String = "string.custom", fn: (String?) -> String?): StringValidator = apply {
         rules += { v ->
@@ -129,6 +132,8 @@ class StringValidator internal constructor(
     }
 
     override fun validate(value: String?): ValidationResult {
+        if (value == null && (isNullable || isOptional)) return ValidationResult.Success
+
         val errors = rules.mapNotNull { it(value) }
         return if (errors.isEmpty()) ValidationResult.Success
         else ValidationResult.Failure(errors)
