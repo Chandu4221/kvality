@@ -21,7 +21,7 @@ Kvality brings Joi-like validation to Kotlin. No annotations, no reflection, no 
 ## Installation
 
 ```kotlin
-implementation("io.github.chandu4221:kvality-core:2.0.0")
+implementation("io.github.chandu4221:kvality-core:3.0.0")
 ```
 
 ---
@@ -62,7 +62,7 @@ data class ValidationError(
     val field: String,   // "email"
     val code: String,    // "string.email"
     val message: String, // "must be a valid email address"
-    val path: String     // "user.email" for nested objects
+    val path: String     // "address.city" for nested objects
 )
 ```
 
@@ -101,6 +101,8 @@ Kvality.string()
     .endsWith(".com")
     .contains("keyword")
     .regex("^[A-Z]+$")
+    .nullable()   // null is allowed
+    .optional()   // skip validation if null
     .custom { if (it != "secret") "must be secret" else null }
 ```
 
@@ -125,6 +127,8 @@ Kvality.number()
     .nonNegative()
     .nonPositive()
     .integer()
+    .nullable()
+    .optional()
     .custom { if (it?.toInt() == 42) "not the answer" else null }
 ```
 
@@ -137,6 +141,8 @@ Kvality.boolean()
     .required()
     .isTrue()
     .isFalse()
+    .nullable()
+    .optional()
     .custom { if (it == null) "required" else null }
 ```
 
@@ -150,6 +156,8 @@ Kvality.list(Kvality.string().min(2))
     .nonEmpty()
     .minItems(1)
     .maxItems(10)
+    .nullable()
+    .optional()
 ```
 
 Item-level errors include indexed paths:
@@ -188,6 +196,42 @@ val userSchema = kvality {
 }
 ```
 
+### Nested Object Validation
+
+```kotlin
+val schema = kvality {
+    field("name") { string().required() }
+    field("address") {
+        objectSchema {
+            field("city") { string().required() }
+            field("zip")  { string().length(6).required() }
+        }
+    }
+}
+
+val result = schema.validate(mapOf(
+    "name" to "Chandu",
+    "address" to mapOf(
+        "city" to "",
+        "zip"  to "123"
+    )
+))
+
+// errors:
+// address.city → "field is required"
+// address.zip  → "must be exactly 6 characters"
+```
+
+Nullable nested object:
+
+```kotlin
+field("address") {
+    objectSchema {
+        field("city") { string().required() }
+    }.nullable() // address can be null
+}
+```
+
 ### Cross-field Validation
 
 ```kotlin
@@ -198,6 +242,15 @@ val schema = kvality {
         input["password"] == input["confirmPassword"]
     }
 }
+```
+
+### Partial Schema (PATCH APIs)
+
+```kotlin
+// all fields become optional
+val patchSchema = userSchema.partial()
+
+patchSchema.validate(mapOf("name" to "Chandu")) // Success — only validates present fields
 ```
 
 ### Schema Composition
@@ -233,6 +286,16 @@ val result = schema.validate(input)
 val errors = result.toMap()
 // { "email": ["must be a valid email address"] }
 ```
+
+---
+
+## Changelog
+
+| Version | Highlights |
+|---------|-----------|
+| 3.0.0 | Nested object validation, nullable/optional distinction, partial schema |
+| 2.0.0 | Structured errors with codes/paths, custom messages, list/enum validators, schema composition |
+| 1.0.0 | Core validators, schema DSL, basic error model |
 
 ---
 
