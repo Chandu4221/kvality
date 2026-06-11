@@ -21,7 +21,7 @@ Kvality brings Joi-like validation to Kotlin. No annotations, no reflection, no 
 ## Installation
 
 ```kotlin
-implementation("io.github.chandu4221:kvality-core:3.2.0")
+implementation("io.github.chandu4221:kvality-core:3.3.0")
 ```
 
 ---
