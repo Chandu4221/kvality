@@ -330,12 +330,37 @@ val errors = result.toMap()
 // { "email": ["must be a valid email address"] }
 ```
 
+## Result Helpers
+
+```kotlin
+// errors for exact field
+result.errorsFor("email")
+
+// all errors under a nested path
+result.errorsUnder("address")  // returns address.city, address.zip etc.
+
+// quick boolean check
+result.hasErrors("email")
+
+// first error message for a field
+result.firstErrorFor("email")
+
+// first error object under a path
+result.firstErrorUnder("address")
+
+// path → messages map (useful for nested objects)
+result.toPathMap()
+// { "address.city": ["field is required"], "address.zip": ["must be exactly 6 characters"] }
+```
+
+
 ---
 
 ## Changelog
 
 | Version | Highlights |
 |---------|-----------|
+| 3.3.0 | Nested error extraction helpers — errorsUnder, hasErrors, firstErrorFor, toPathMap |
 | 3.2.0 | Typed accessor helpers for safe cross-field validation |
 | 3.1.0 | Strict mode — reject unknown fields |
 | 3.0.1 | Bug fixes — nullable/optional flag propagation, numeric precision, regex safety |
