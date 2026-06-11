@@ -21,7 +21,7 @@ Kvality brings Joi-like validation to Kotlin. No annotations, no reflection, no 
 ## Installation
 
 ```kotlin
-implementation("io.github.chandu4221:kvality-core:3.0.0")
+implementation("io.github.chandu4221:kvality-core:3.1.0")
 ```
 
 ---
@@ -275,6 +275,25 @@ val omitSchema = userSchema.omit("password")
 val mergedSchema = schemaA.merge(schemaB)
 ```
 
+### Strict Mode
+
+Reject any fields not defined in the schema:
+
+```kotlin
+val schema = kvality {
+    field("name")  { string().required() }
+    field("email") { string().email().required() }
+}.strict()
+
+val result = schema.validate(mapOf(
+    "name"  to "Chandu",
+    "email" to "chandu@example.com",
+    "extra" to "not allowed"
+))
+
+// ValidationResult.Failure
+// extra → "unknown field 'extra'" (code: schema.unknownField)
+```
 ---
 
 ## Simple Error Map
@@ -293,11 +312,11 @@ val errors = result.toMap()
 
 | Version | Highlights |
 |---------|-----------|
+| 3.1.0 | Strict mode — reject unknown fields |
+| 3.0.1 | Bug fixes — nullable/optional flag propagation, numeric precision, regex safety |
 | 3.0.0 | Nested object validation, nullable/optional distinction, partial schema |
 | 2.0.0 | Structured errors with codes/paths, custom messages, list/enum validators, schema composition |
 | 1.0.0 | Core validators, schema DSL, basic error model |
-
----
 
 ## License
 
