@@ -66,6 +66,10 @@ class ListValidator<T> internal constructor(
 
     internal fun withField(name: String, parentPath: String = ""): ListValidator<T> {
         val newPath = if (parentPath.isEmpty()) name else "$parentPath.$name"
-        return ListValidator(itemValidator, name, newPath).also { it.rules.addAll(this.rules) }
+        return ListValidator(itemValidator, name, newPath).also {
+            it.rules.addAll(this.rules)
+            it.isNullable = this.isNullable
+            it.isOptional = this.isOptional
+        }
     }
 }

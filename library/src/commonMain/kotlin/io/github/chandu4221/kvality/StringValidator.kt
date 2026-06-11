@@ -45,7 +45,11 @@ class StringValidator internal constructor(
     }
 
     fun regex(pattern: String, message: String = "invalid format"): StringValidator = apply {
-        val r = Regex(pattern)
+        val r = try {
+            Regex(pattern)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Invalid regex pattern: $pattern", e)
+        }
         rules += { v ->
             if (v != null && !r.matches(v)) ValidationError(fieldName, "string.regex", message, path)
             else null
@@ -141,6 +145,10 @@ class StringValidator internal constructor(
 
     internal fun withField(name: String, parentPath: String = ""): StringValidator {
         val newPath = if (parentPath.isEmpty()) name else "$parentPath.$name"
-        return StringValidator(name, newPath).also { it.rules.addAll(this.rules) }
+        return StringValidator(name, newPath).also {
+            it.rules.addAll(this.rules)
+            it.isNullable = this.isNullable
+            it.isOptional = this.isOptional
+        }
     }
 }

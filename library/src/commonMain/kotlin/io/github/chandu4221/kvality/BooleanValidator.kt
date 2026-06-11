@@ -51,6 +51,10 @@ class BooleanValidator internal constructor(
 
     internal fun withField(name: String, parentPath: String = ""): BooleanValidator {
         val newPath = if (parentPath.isEmpty()) name else "$parentPath.$name"
-        return BooleanValidator(name, newPath).also { it.rules.addAll(this.rules) }
+        return BooleanValidator(name, newPath).also {
+            it.rules.addAll(this.rules)
+            it.isNullable = this.isNullable
+            it.isOptional = this.isOptional
+        }
     }
 }
