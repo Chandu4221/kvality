@@ -21,7 +21,7 @@ Kvality brings Joi-like validation to Kotlin. No annotations, no reflection, no 
 ## Installation
 
 ```kotlin
-implementation("io.github.chandu4221:kvality-core:3.1.0")
+implementation("io.github.chandu4221:kvality-core:3.2.0")
 ```
 
 ---
@@ -244,6 +244,30 @@ val schema = kvality {
 }
 ```
 
+Use typed accessor helpers for safe cross-field access:
+
+```kotlin
+val schema = kvality {
+    field("password")        { string().required() }
+    field("confirmPassword") { string().required() }
+    validate("passwords do not match") { input ->
+        input.getString("password") == input.getString("confirmPassword")
+    }
+}
+```
+
+Available helpers on `Map<String, Any?>`:
+
+```kotlin
+input.getString("field")
+input.getInt("field")
+input.getLong("field")
+input.getDouble("field")
+input.getBoolean("field")
+input.getList("field")
+input.getMap("field")
+```
+
 ### Partial Schema (PATCH APIs)
 
 ```kotlin
@@ -312,6 +336,7 @@ val errors = result.toMap()
 
 | Version | Highlights |
 |---------|-----------|
+| 3.2.0 | Typed accessor helpers for safe cross-field validation |
 | 3.1.0 | Strict mode — reject unknown fields |
 | 3.0.1 | Bug fixes — nullable/optional flag propagation, numeric precision, regex safety |
 | 3.0.0 | Nested object validation, nullable/optional distinction, partial schema |
