@@ -2,10 +2,21 @@ package io.github.chandu4221.kvality
 
 class Schema internal constructor(
     private val fields: Map<String, Validator<*>>,
-    private val crossFieldValidators: MutableList<(Map<String, Any?>) -> ValidationError?> = mutableListOf()
+    private val crossFieldValidators: MutableList<(Map<String, Any?>) -> ValidationError?> = mutableListOf(),
+    private val isStrict: Boolean = false
 ) {
+    fun strict(): Schema = Schema(fields, crossFieldValidators, true)
+
     fun validate(input: Map<String, Any?>, parentPath: String = ""): ValidationResult {
         val allErrors = mutableListOf<ValidationError>()
+
+        if (isStrict) {
+            val knownFields = fields.keys
+            input.keys.filter { it !in knownFields }.forEach { unknownField ->
+                val path = if (parentPath.isEmpty()) unknownField else "$parentPath.$unknownField"
+                allErrors.add(ValidationError(unknownField, "schema.unknownField", "unknown field '$unknownField'", path))
+            }
+        }
 
         fields.forEach { (fieldName, validator) ->
             val value = input[fieldName]

@@ -169,4 +169,48 @@ class SchemaTest {
         assertTrue(result is ValidationResult.Failure)
         assertEquals("enum.invalid", (result as ValidationResult.Failure).errors.first().code)
     }
+
+    @Test
+    fun `strict mode rejects unknown fields`() {
+        val schema = kvality {
+            field("name") { string().required() }
+        }.strict()
+
+        val result = schema.validate(mapOf(
+            "name" to "Chandu",
+            "hackerField" to "malicious"
+        ))
+
+        assertTrue(result is ValidationResult.Failure)
+        assertEquals("schema.unknownField", (result as ValidationResult.Failure).errors.first().code)
+    }
+
+    @Test
+    fun `strict mode passes when no unknown fields`() {
+        val schema = kvality {
+            field("name") { string().required() }
+            field("email") { string().email().required() }
+        }.strict()
+
+        val result = schema.validate(mapOf(
+            "name" to "Chandu",
+            "email" to "chandu@example.com"
+        ))
+
+        assertTrue(result is ValidationResult.Success)
+    }
+
+    @Test
+    fun `non strict mode ignores unknown fields`() {
+        val schema = kvality {
+            field("name") { string().required() }
+        }
+
+        val result = schema.validate(mapOf(
+            "name" to "Chandu",
+            "unknownField" to "value"
+        ))
+
+        assertTrue(result is ValidationResult.Success)
+    }
 }
